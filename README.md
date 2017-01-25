@@ -10,17 +10,17 @@ against an external identity provider like Auth0, Google Identify Platform or
 Azure Identity. Note that this middleware is limited to verify that the
 provided token is valid and does not provide any features beyond that.
 
-This middleware uses [Go
+This middleware uses the [Go
 Openid](https://github.com/emanoelxavier/openid2go/tree/master/openid)
 middleware that was written for the Go http server.
 
 ### Caddyfile Syntax
-To set up the middleware you need to declare a `openid_auth` block and provide
+To set up the middleware you need to declare a `openidauth` block and provide
 information about the token issuer, client ids and which paths to protect:
 
 
 ```
-openid_auth {
+openidauth {
    issuer [issuer]
    clientid [clientid1]
    clientid [clientid2]
@@ -34,7 +34,7 @@ ids an empty list will be used.
 Here is a full example configuration:
 
 ```
-openid_auth {
+openidauth {
    issuer https://accounts.google.com
    clientid 407408718192.apps.googleusercontent.com
    path /protected/ 
@@ -69,7 +69,7 @@ You also need to insert a directive into plugins.go, eg before "jwt":
 ```
 ...
 	"mime",
-	"openiduath", // github.com/vizrt/openidauth
+	"openidauth", // github.com/vizrt/openidauth
 	"jwt",        // github.com/BTBurke/caddy-jwt
 ...
 ```
