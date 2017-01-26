@@ -28,8 +28,7 @@ openidauth {
    path [path2]
 }
 ```
-Issuer and at least one path is mandatory. If you do not specify any client
-ids an empty list will be used.
+Issuer and at least one path and at least one client id is mandatory.
 
 Here is a full example configuration:
 
@@ -57,14 +56,14 @@ If no token is provided and the resource is protected the middleware
 will insert a header: WWW-Authenticate: Bearer
 
 ### Enabling the middleware in Caddy ###
-To enable this plugin run go get github.com/vizrt/openid_auth and import it
+To enable this plugin run go get github.com/vizrt/openidauth and import it
 run [run.go](https://github.com/mholt/caddy/blob/master/caddy/caddymain/run.go)
 
 ```
-import _ "github.com/vizrt/openid_auth"
+import _ "github.com/vizrt/openidauth"
 ```
 
-You also need to insert a directive into plugins.go, eg before "jwt":
+You also need to insert a directive into [plugin.go](https://github.com/mholt/caddy/blob/master/caddyhttp/httpserver/plugin.go), eg before "jwt":
 
 ```
 ...
