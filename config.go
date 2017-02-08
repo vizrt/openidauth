@@ -66,7 +66,7 @@ func parseSingleValue(c *caddy.Controller) (string, error) {
 	return r, nil
 }
 
-func parse(c *caddy.Controller) (string, []string, []string, error) {
+func parse(c *caddy.Controller) (issuer string, clientIds, paths []string, err error) {
 	// This parses the following config blocks
 	/*
 	   openid_auth {
@@ -78,9 +78,6 @@ func parse(c *caddy.Controller) (string, []string, []string, error) {
 	   }
 	*/
 
-	issuer := ""
-	var paths []string
-	var clientIds []string
 	for c.Next() {
 		args := c.RemainingArgs()
 		switch len(args) {
@@ -96,6 +93,9 @@ func parse(c *caddy.Controller) (string, []string, []string, error) {
 					paths = append(paths, path)
 
 				case "issuer":
+					if issuer != "" {
+						return issuer, clientIds, paths, errors.New("openidauth: only 1 issuer can be configured")
+					}
 					is, err := parseSingleValue(c)
 					if err != nil {
 						return "", nil, nil, err
@@ -115,7 +115,12 @@ func parse(c *caddy.Controller) (string, []string, []string, error) {
 		}
 	}
 	if issuer == "" {
-		return issuer, clientIds, paths, errors.New("openidauth: issuer cannot be empty")
+		return issuer, clientIds, paths, errors.New("Openidauth: issuer cannot be empty")
 	}
+
+	if len(clientIds) == 0 {
+		return issuer, clientIds, paths, errors.New("Openidauth: at least 1 clientid needs to be set up")
+	}
+
 	return issuer, clientIds, paths, nil
 }

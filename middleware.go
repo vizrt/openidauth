@@ -10,8 +10,8 @@ import (
 	"github.com/mholt/caddy/caddyhttp/httpserver"
 )
 
-// A function literal that fullfils the requirement of openId.PrivdersGetter
-// It is used to ser up a new provider with the issuer and client ids from
+// A function literal that fulfils the requirement of openId.PrivdersGetter
+// It is used to sert up a new provider with the issuer and client ids from
 // the configuration.
 func getProviderFunc(issuer string, clientIds []string) openid.GetProvidersFunc {
 	return func() ([]openid.Provider, error) {
@@ -23,17 +23,16 @@ func getProviderFunc(issuer string, clientIds []string) openid.GetProvidersFunc 
 	}
 }
 
-// This struct fullfuls the http.Handler interface that the openid.Authenticate
+// This struct fulfils the http.Handler interface that the openid.Authenticate
 // function uses. It will be used to store the authenticate result
 // so that we can read it back in this middleware and make decisions
 // based on it.
-//
-type authenticationSuccessfull struct {
+type authenticationSuccessHandler struct {
 	Authenticated bool
 }
 
-// After successfull validation of a token this handler will be called
-func (t *authenticationSuccessfull) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// After successful validation of a token this handler will be called
+func (t *authenticationSuccessHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.Authenticated = true
 }
 
@@ -46,7 +45,7 @@ func onAuthenticateFailed(e error, rw http.ResponseWriter, r *http.Request) bool
 		case openid.ValidationErrorGetOpenIdConfigurationFailure:
 			httpStatus = http.StatusServiceUnavailable
 		case openid.ValidationErrorAuthorizationHeaderNotFound:
-			// Istead of respoding with 400 Bad Response we want to say 401 Unauthorized
+			// Instead of responding with 400 Bad Response we want to say 401 Unauthorized
 			// and indicate that this resource is protected and that you can authenticate
 			// using a Bearer token. 400 Bad response was set in the validation error from
 			// the underlaying openid code.
@@ -65,10 +64,10 @@ func onAuthenticateFailed(e error, rw http.ResponseWriter, r *http.Request) bool
 	return /*halt=*/ true
 }
 
-// ServeHTTP is the main entrypoint for the middleware during execution.
+// ServeHTTP is the main entry point for the middleware during execution.
 func (h auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 
-	// To support having the token as a query paramter we extract it here and
+	// To support having the token as a query parameter we extract it here and
 	// insert it as an Authorization header so that the underlaying code
 	// (which only can use the Authorization header) works.
 	a := request.ArgumentExtractor{"access_token"}
@@ -77,14 +76,14 @@ func (h auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 		r.Header.Set("Authorization", "Bearer "+token)
 	}
 
-	// If the requested path mathces a path in the configuration, validate the JWT
+	// If the requested path matches a path in the configuration, validate the JWT
 	for _, p := range h.Paths {
 		if !httpserver.Path(r.URL.Path).Matches(p) {
 			continue
 		}
 
 		// Path matches. Authenticate
-		authHandler := authenticationSuccessfull{false}
+		authHandler := authenticationSuccessHandler{false}
 		openid.Authenticate(h.Configuration, &authHandler).ServeHTTP(w, r)
 		if !authHandler.Authenticated {
 			// The success handler was not called, so it failed.
