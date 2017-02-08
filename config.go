@@ -122,5 +122,9 @@ func parse(c *caddy.Controller) (issuer string, clientIds, paths []string, err e
 		return issuer, clientIds, paths, errors.New("Openidauth: at least 1 clientid needs to be set up")
 	}
 
+	if len(paths) == 0 {
+		return issuer, clientIds, paths, errors.New("Openidauth: at least 1 path needs to be set up")
+	}
+
 	return issuer, clientIds, paths, nil
 }
