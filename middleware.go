@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go/request"
 	"github.com/emanoelxavier/openid2go/openid"
 	"github.com/mholt/caddy/caddyhttp/httpserver"
 )
@@ -70,9 +69,11 @@ func (h auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 	// To support having the token as a query parameter we extract it here and
 	// insert it as an Authorization header so that the underlaying code
 	// (which only can use the Authorization header) works.
-	a := request.ArgumentExtractor{"access_token"}
-	token, err := a.ExtractToken(r)
-	if err == nil {
+	// Note that tokens supplied via form data in the request body is NOT supported.
+	// According to the OpenID spec this MAY be implemented, but would require buffering the
+	// full request body to be able to both read it here and forward it to the backend.
+	token := r.URL.Query().Get("access_token")
+	if token != "" {
 		r.Header.Set("Authorization", "Bearer "+token)
 	}
 
